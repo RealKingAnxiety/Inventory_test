@@ -1,0 +1,110 @@
+//The github thingy wasn't loading properly so I just programmed it here
+//and looked up how to make multiple inputs of code work with the node.js
+//i had a lot of help from the internet with this one, since no teachers were
+//available at the moment
+
+const YEAR = 0;
+const MAKE = 1;
+const MODEL = 2;
+
+let inventory = [];
+
+const readline = require('readline').createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
+function printMenu() {
+    console.log("\n=== Car Dealership Inventory Menu ===");
+    console.log("1. Add Vehicle");
+    console.log("2. Remove Vehicle");
+    console.log("3. View Inventory");
+    console.log("4. Quit");
+}
+
+function getUserInput(callback) {
+    readline.question("Please enter your selection (1-4): ", (input) => {
+        callback(parseInt(input));
+    });
+}
+
+function handleUserInput(option, callback) {
+    switch(option) {
+        case 1:
+            addVehicle(callback);
+            break;
+        case 2:
+            removeVehicle(callback);
+            break;
+        case 3:
+            viewInventory();
+            callback();
+            break;
+        case 4:
+            console.log("Closed");
+            readline.close();
+            break;
+        default:
+            console.log("Invalid.");
+            callback();
+    }
+}
+
+function addVehicle(callback) {
+    readline.question("Enter vehicle year: ", (year) => {
+        readline.question("Enter vehicle make: ", (make) => {
+            readline.question("Enter vehicle model: ", (model) => {
+                inventory.push([year, make, model]);
+                console.log("Vehicle added to inventory.");
+                callback();
+            });
+        });
+    });
+}
+
+function removeVehicle(callback) {
+    if (inventory.length === 0) {
+        console.log("Inventory is empty.");
+        callback();
+        return;
+    }
+
+    viewInventory();
+    readline.question("Enter the number of the vehicle to remove: ", (index) => {
+        let idx = parseInt(index) - 1;
+        if (idx >= 0 && idx < inventory.length) {
+            let removed = inventory.splice(idx, 1);
+            console.log(`Removed vehicle: ${removed[0][YEAR]} ${removed[0][MAKE]} ${removed[0][MODEL]}`);
+        } else {
+            console.log("Invalid.");
+        }
+        callback();
+    });
+}
+
+function viewInventory() {
+    console.log("\n=== Current Inventory ===");
+    if (inventory.length === 0) {
+        console.log("No vehicles in inventory.");
+    } else {
+        inventory.forEach((vehicle, index) => {
+            console.log(`${index + 1}. ${vehicle[YEAR]} ${vehicle[MAKE]} ${vehicle[MODEL]}`);
+        });
+    }
+}
+
+function main() {
+    printMenu();
+    getUserInput(function handleInput(input) {
+        if (input === 4) {
+            handleUserInput(input, null);
+        } else {
+            handleUserInput(input, () => {
+                printMenu();
+                getUserInput(handleInput);
+            });
+        }
+    });
+}
+
+main();
